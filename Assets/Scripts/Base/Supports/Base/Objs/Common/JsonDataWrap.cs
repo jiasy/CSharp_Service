@@ -67,6 +67,9 @@ namespace Objs {
             }
             return _jsonDict;
         }
+        public static string toJsonString(JsonData jsonDict_){
+            return convertToNormalJsonData(jsonDict_).ToJson();
+        }
         #endregion
 
         public JsonData dataSet = null;
@@ -79,20 +82,33 @@ namespace Objs {
             dataSet = new JsonData ();
             dataSet.SetJsonType (JsonType.Object);
         }
-
+        //递归清理字典对象
+        public void clearJsonDict(JsonData jsonDict_){
+            foreach (string _tempKey in jsonDict_.Keys) {
+                JsonData _tempValue = jsonDict_[_tempKey];
+                if(_tempValue.IsObject){//先递归这个对象
+                    clearJsonDict(_tempValue);
+                }else if(_tempValue.IsArray){
+                    //不会有数组对象
+                }
+                _tempValue.Clear();//后清理
+                jsonDict_.Remove(_tempKey);//再后，移除键值关系
+            }
+        }
         public override void Dispose () {
+            clearJsonDict(dataSet);
             dataSet.Clear();
             dataSet = null;
-            pathValueDict.Clear();
+            pathValueDict.Clear();//清理键值关系，值并没有清理
             pathValueDict = null;
-            justChangeDict.Clear();
+            justChangeDict.Clear();//清理键值关系，值并没有清理
             justChangeDict = null;
             base.Dispose ();
         }
         #endregion
 
         #region 打印以及获取路径值
-        public void PrintPathValueDict(){
+        public void printPathValueDict(){
             string _logStr = "pathValueDict : \n";
             foreach(string _tempPath in pathValueDict.Keys) {//以这个路径开头的所有缓存都全部清理
                 _logStr += "    " + _tempPath + " : " + pathValueDict[_tempPath].ToString() + "\n";
@@ -100,7 +116,7 @@ namespace Objs {
             Debug.Log(_logStr);
         }
 
-        public void PrintJustChangeDict(){
+        public void printJustChangeDict(){
             string _logStr = "justChangeDict : \n";
             foreach(string _tempPath in justChangeDict.Keys) {//以这个路径开头的所有缓存都全部清理
                 _logStr += "    " + _tempPath + " : " + justChangeDict[_tempPath].ToString() + "\n";
@@ -124,6 +140,10 @@ namespace Objs {
                 }
             }
             return null;
+        }
+
+        public string toJsonString(){
+            return toJsonString(dataSet);
         }
         #endregion
 
