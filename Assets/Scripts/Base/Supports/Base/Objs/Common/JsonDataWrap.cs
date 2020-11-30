@@ -49,6 +49,21 @@ namespace Objs {
             public string parentPath;
             public JsonData parentDict;
         }; 
+        private ParentDictInfo getParentDictInfo(string path_){
+            ParentDictInfo _parentDictInfo;
+            if (path_.Contains(".")) {//多层
+                ArrayList _dataPathList = new ArrayList (path_.Split('.'));
+                _parentDictInfo.key = (string)_dataPathList[_dataPathList.Count - 1];
+                _dataPathList.RemoveAt(_dataPathList.Count - 1);//退出最后一个
+                _parentDictInfo.parentPath = string.Join(".",_dataPathList);//合并出所在的字典节点路径
+                _parentDictInfo.parentDict = getDictOnPath(_parentDictInfo.parentPath,false);//获取父数据节点，不确保其存在
+            } else { //根路径下的第一层
+                _parentDictInfo.key = path_;
+                _parentDictInfo.parentPath = "";
+                _parentDictInfo.parentDict = dataSet;
+            }
+            return _parentDictInfo;
+        }
 
         //获取路径上的数据
         public string getStringValueOnPath(string path_){
@@ -66,22 +81,6 @@ namespace Objs {
                 }
             }
             return null;
-        }
-
-        private ParentDictInfo getParentDictInfo(string path_){
-            ParentDictInfo _parentDictInfo;
-            if (path_.Contains(".")) {//多层
-                ArrayList _dataPathList = new ArrayList (path_.Split('.'));
-                _parentDictInfo.key = (string)_dataPathList[_dataPathList.Count - 1];
-                _dataPathList.RemoveAt(_dataPathList.Count - 1);//退出最后一个
-                _parentDictInfo.parentPath = string.Join(".",_dataPathList);//合并出所在的字典节点路径
-                _parentDictInfo.parentDict = getDictOnPath(_parentDictInfo.parentPath,false);//获取父数据节点，不确保其存在
-            } else { //根路径下的第一层
-                _parentDictInfo.key = path_;
-                _parentDictInfo.parentPath = "";
-                _parentDictInfo.parentDict = dataSet;
-            }
-            return _parentDictInfo;
         }
 
         //清理数据路径上的字典
@@ -154,54 +153,71 @@ namespace Objs {
             return _dictOnPath;
         }
         
+        // 所在路径上的字典 和 当前路径 + 键 构成的目标路径
+        private struct DictAndPathInfo{
+            // path 指定路径上的字典对象
+            public JsonData currentDictOnPath;
+            // path . key 目标路径
+            public string currentPath;
+        }
+        //获取当前的路径上的字典和拼接键后的目标路径
+        private DictAndPathInfo getDictAndPathInfo(
+            string path_,
+            string key_,
+            bool isMain_ = true
+        ){
+            DictAndPathInfo _dictAndPathInfo;
+            if (string.IsNullOrEmpty (key_)) {
+                Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
+                    " key_ 不能为空"
+                );
+                _dictAndPathInfo.currentDictOnPath = null;
+                _dictAndPathInfo.currentPath = null;
+            }else{
+                if (string.IsNullOrEmpty (path_)) {//空 或者 空字符串 都是直接在数据对象上操作
+                    _dictAndPathInfo.currentDictOnPath = dataSet;
+                }else{
+                    _dictAndPathInfo.currentDictOnPath = getDictOnPath(path_,true);
+                }
+                if (isMain_){//外部调用
+                    justChangeDict.Clear();//清理键值
+                }
+                StringBuilder _sb = new StringBuilder (20);
+                _sb.Append (path_);
+                _sb.Append (".");
+                _sb.Append (key_);
+                _dictAndPathInfo.currentPath = _sb.ToString ();//当前路径
+                _sb.Clear ();
+            }
+            return _dictAndPathInfo;
+        }
+        //纯值时，检验原有值和当前值是不是一个类型并提示
+        private void checkIsValueTypeChange(JsonData original_,JsonData current_,string currentPath_){
+            if(original_.GetJsonType() != current_.GetJsonType()){//新值和原有类型不一样
+                if(original_.IsBoolean || original_.IsString || current_.IsBoolean || current_.IsString){
+                    Debug.LogError("原有值和现有值中有非数字类型，且变更前后类型发生变化，应当是 数字、布尔、字符串 之间的变化。\n"+currentPath_);
+                }
+                if(original_.IsObject){//字典和数组都是字典
+                    Debug.LogError("原有值是数组或字典，变换成纯值\n"+currentPath_);
+                }
+            }
+        }
+        //向路径上添加一个键值
         public void addKeyValueToPath(
             string path_,
             string key_,
             JsonData value_,
             bool isMain_ = true
         ){
-            if (string.IsNullOrEmpty (key_)) {
-                Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
-                    " key_ 不能为空"
-                );
-                return;
-            }
-
-            JsonData _currentDictOnPath = null;
-            if (string.IsNullOrEmpty (path_)) {//空 或者 空字符串 都是直接在数据对象上操作
-                _currentDictOnPath = dataSet;
-            }else{
-                _currentDictOnPath = getDictOnPath(path_,true);
-            }
-
-            if(_currentDictOnPath == null){
-                return;
-            }
-
-            if (isMain_){//外部调用
-                justChangeDict.Clear();//清理键值
-            }
-
-            StringBuilder _sb = new StringBuilder (20);
-            _sb.Append (path_);
-            _sb.Append (".");
-            _sb.Append (key_);
-            string _currentPath = _sb.ToString ();//当前路径
-            _sb.Clear ();
-            
+            DictAndPathInfo _dictAndPathInfo = getDictAndPathInfo(path_,key_,isMain_);
+            JsonData _currentDictOnPath = _dictAndPathInfo.currentDictOnPath;
+            string _currentPath = _dictAndPathInfo.currentPath;
             JsonData _originalValue = null;
             if (value_.IsInt ||value_.IsDouble ||value_.IsLong ||value_.IsBoolean ||value_.IsString) {
                 if (pathValueDict.ContainsKey(_currentPath)) {// 原来这个位置有值
                     _originalValue = pathValueDict[_currentPath];//获取原有值
-                    if(_originalValue.GetJsonType() != value_.GetJsonType()){//新值和原有类型不一样
-                        if(_originalValue.IsBoolean || _originalValue.IsString || value_.IsBoolean || value_.IsString){
-                            Debug.LogError("原有值和现有值中有非数字类型，且变更前后类型发生变化，应当是 数字、布尔、字符串 之间的变化。\n"+_currentPath);
-                        }
-                        if(_originalValue.IsObject){//字典和数组都是字典
-                            Debug.LogError("原有值是数组或字典，变换成纯值\n"+_currentPath);
-                        }
-                    }
-                    _originalValue.Clear();//IsArray、IsObject时有效
+                    checkIsValueTypeChange(_originalValue,value_,_currentPath);//校验当前值类型是否变化
+                    _originalValue.Clear();
                 }
                 pathValueDict[_currentPath] = value_;//缓存新值
                 justChangeDict[_currentPath] = value_;//缓存变化
@@ -215,6 +231,7 @@ namespace Objs {
                     _oldDictOnPath.Clear();//调用清理方法，清理字典
                     clearDictOnPath(_currentPath);//清理对象
                 }
+                StringBuilder _sb = new StringBuilder (20);
                 //清理原有数组。需要清理整个字典
                 for (int _idx = 0; _idx < value_.Count; _idx++) {
                      var _tempValue = value_[_idx];
@@ -246,16 +263,44 @@ namespace Objs {
                 justChangeDict[_currentPath] = getDictOnPath(_currentPath,false);
             }
         }
-        public void addKeyValueToPath(
-            string path_,
-            string key_,
-            object obj_
-        ){
-            addKeyValueToPath(
-                path_,
-                key_,
-                new JsonData(obj_)
-            );
+
+        public JsonData convertObjectToJsonData(object obj_){
+            JsonData _jsonDict = new JsonData();
+            _jsonDict.SetJsonType (JsonType.Object);
+            foreach (System.Reflection.PropertyInfo _kvObj in obj_.GetType ().GetProperties ()) {
+                if (_kvObj.DeclaringType != _kvObj.ReflectedType) { //非自定义方法
+                    continue;
+                }
+                string _key = _kvObj.Name;
+                var _value = _kvObj.GetValue (obj_);
+                if (_value is bool ||_value is string ||_value is int ||_value is double) {
+                    _jsonDict[_key] = new JsonData(_value);
+                } else if (_value is Array) {
+                    _jsonDict[_key] = convertArrayToJsonData((Array)_value);
+                } else if (_value is object) {//最后包对象，因为对象是基类...上面的条件都满足
+                    _jsonDict[_key] = convertObjectToJsonData(_value);
+                }
+            }
+            return _jsonDict;
+        }
+        public JsonData convertArrayToJsonData(Array arr_){
+            JsonData _jsonArr = new JsonData();
+            _jsonArr.SetJsonType (JsonType.Array);
+            for (int _idx = 0; _idx < arr_.Length; _idx++) {
+                var _item = arr_.GetValue (_idx);
+                if (_item is bool ||_item is string ||_item is int ||_item is double) {
+                    _jsonArr.Add(new JsonData(_item));
+                }else if(_item is Array) {
+                    _jsonArr.Add(convertArrayToJsonData((Array)_item));
+                } else if (_item is object) {//最后包对象，因为对象是基类...上面的条件都满足
+                    _jsonArr.Add(convertObjectToJsonData(_item));
+                }
+            }
+            return _jsonArr;
+        }
+
+        public void addKeyValueToPath(string path_,string key_,object obj_,bool isMain_ = true){
+            addKeyValueToPath(path_,key_,convertObjectToJsonData(obj_),isMain_);
         }
     }
 }
