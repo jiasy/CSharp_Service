@@ -15,10 +15,10 @@ public delegate void CallBack<T, X, Y, Z> (T arg1, X arg2, Y arg3, Z arg4);
 //任何一个对象，都可以持有一个事件转发对象。
 //ValueObj通过 动态的 数据路径，进行数据的监听
 //StateObj通过 固定的 状态 变化中 + 变化后，来做事件监听。
-public class EventObserverObj : BaseObj {
+public class EventDispatcherObj : BaseObj {
     private Dictionary<string, Delegate> _evtListenerDict = new Dictionary<string, Delegate> ();
 
-    public EventObserverObj () : base () {
+    public EventDispatcherObj () : base () {
 
     }
 
@@ -61,7 +61,7 @@ public class EventObserverObj : BaseObj {
     }
 
     //广播事件
-    public void Broadcast<T> (string evtName_, T arg_) {
+    public void DispatchEvent<T> (string evtName_, T arg_) {
         if (_evtListenerDict.ContainsKey (evtName_) == false) {
             return; //没有监听就部不用分发
         }
@@ -109,7 +109,7 @@ public class EventObserverObj : BaseObj {
     }
 
     //广播事件
-    public void Broadcast<T, X> (string evtName_, T arg1_, X arg2_) {
+    public void DispatchEvent<T, X> (string evtName_, T arg1_, X arg2_) {
         if (_evtListenerDict.ContainsKey (evtName_) == false) {
             return; //没有监听就部不用分发
         }

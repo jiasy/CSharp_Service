@@ -87,7 +87,7 @@ namespace Utils {
             _changeDict[5/*(int) DataType.Dict*/] = new Dictionary<string, IJsonWrapper> ();
             return _changeDict;
         }
-        //EventObserverObj,Data change happened.one at a time.
+        //EventDispatcherObj,Data change happened.one at a time.
         public static Dictionary<string, IJsonWrapper>[] clearChangeDict () {
             _currentChangingDict[0/*(int) DataType.Int*/].Clear ();
             _currentChangingDict[1/*(int) DataType.Float*/].Clear ();

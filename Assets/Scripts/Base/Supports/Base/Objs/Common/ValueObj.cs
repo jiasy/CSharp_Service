@@ -8,21 +8,16 @@ using Utils;
 // 数据对象，内置一个JsonData。可以进行数据的兼并
 namespace Objs {
     public class ValueObj : BaseObj {
-        public EventObserverObj eventObserver = null;//数据变化的观察者
+        public EventDispatcherObj eventDispatcher = null;//数据变化的观察者
         public JsonDataWrapObj jsonDataWrap = null;//数据保存对象
         private List<string> _dataPathListenList = new List<string>();//监听的数据列表
-        public static void doSample () {
-            //给定一个事件中心的方式创建值对象
-            EventObserverObj _eventObserver = new EventObserverObj ();
-            ValueObj _vo = new ValueObj (_eventObserver);
-        }
 
-        public ValueObj (EventObserverObj eventObserver_ = null) : base () {
+        public ValueObj (EventDispatcherObj eventDispatcher_ = null) : base () {
             //可以用给定的，也可以用自己创建的
-            if(eventObserver_ ==null){
-                eventObserver = new EventObserverObj();
+            if(eventDispatcher_ ==null){
+                eventDispatcher = new EventDispatcherObj();
             }else{
-                eventObserver = eventObserver_;
+                eventDispatcher = eventDispatcher_;
             }
             jsonDataWrap = new JsonDataWrapObj();
         }
@@ -43,14 +38,14 @@ namespace Objs {
         public void setValueToPath (string dataPath_, JsonData value_, bool dispatchEvent_ = true) {
             jsonDataWrap.setValueToPath(dataPath_,value_);
             if (dispatchEvent_) {
-                broadcastDataChanged (jsonDataWrap.justChangeDict);
+                dispatchDataChanged (jsonDataWrap.justChangeDict);
             }
         }
         //sv object
         public void setValueToPath (string dataPath_, object value_, bool dispatchEvent_ = true) {
             jsonDataWrap.setValueToPath(dataPath_,value_);
             if (dispatchEvent_) {
-                broadcastDataChanged (jsonDataWrap.justChangeDict);
+                dispatchDataChanged (jsonDataWrap.justChangeDict);
             }
         }
         //sv jsonStr
@@ -64,10 +59,10 @@ namespace Objs {
             if (_dataPathListenList.IndexOf (dataPath_) >= 0) { //监听过了
                 return;
             }
-            eventObserver.AddListener<string, JsonData> (dataPath_, dataChangeHandle);
+            eventDispatcher.AddListener<string, JsonData> (dataPath_, dataChangeHandle);
         }
         public void removeDataPathListen (string dataPath_) {
-            eventObserver.RemoveListener<string, JsonData> (dataPath_, dataChangeHandle);
+            eventDispatcher.RemoveListener<string, JsonData> (dataPath_, dataChangeHandle);
         }
         public void addDataPathListenByList (List<string> targetDataPathList_) {
             List<string> _newDataPathListenList = ListUtils.except (targetDataPathList_, _dataPathListenList);//当前对象没有监听过的
@@ -82,11 +77,10 @@ namespace Objs {
                 " ValueObj 数据变更响应，需要子类实现"
             );
         }
-
         //广播数据变化
-        public void broadcastDataChanged (Dictionary<string, JsonData> justChangeDict_) {
+        public void dispatchDataChanged (Dictionary<string, JsonData> justChangeDict_) {
             foreach(string _path in justChangeDict_.Keys){
-                eventObserver.Broadcast(
+                eventDispatcher.DispatchEvent(
                     _path,//事件名
                     _path,//路径
                     justChangeDict_[_path]//值
@@ -98,8 +92,8 @@ namespace Objs {
             for (int _idx = 0; _idx < _dataPathListenList.Count; _idx++) {
                 removeDataPathListen (_dataPathListenList[_idx]);
             }
-            eventObserver.Dispose();
-            eventObserver = null;
+            eventDispatcher.Dispose();
+            eventDispatcher = null;
             jsonDataWrap.Dispose();
             jsonDataWrap = null;
             base.Dispose ();

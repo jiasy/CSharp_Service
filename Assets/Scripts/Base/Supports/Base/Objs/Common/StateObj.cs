@@ -12,22 +12,22 @@ namespace Objs {
         public string currentState; //当前状态
         public string lastState; //上一个状态
         public string targetState; //目标状态
-        public EventObserverObj eventObserver; //事件分发
+        public EventDispatcherObj eventDispatcher; //事件分发
 
-        public StateObj (EventObserverObj eventObserver_ = null) : base () {
+        public StateObj (EventDispatcherObj eventDispatcher_ = null) : base () {
             currentState = null;
             lastState = null;
             targetState = null;
             //可以用给定的，也可以用自己创建的
-            if (eventObserver_ == null) {
-                eventObserver = new EventObserverObj ();
+            if (eventDispatcher_ == null) {
+                eventDispatcher = new EventDispatcherObj ();
             } else {
-                eventObserver = eventObserver_;
+                eventDispatcher = eventDispatcher_;
             }
         }
         public override void Dispose () {
-            eventObserver.Dispose ();
-            eventObserver = null;
+            eventDispatcher.Dispose ();
+            eventDispatcher = null;
             base.Dispose ();
         }
         //立刻改变状态，然后，立刻结束。
@@ -49,8 +49,8 @@ namespace Objs {
                 return targetState;
             }
             targetState = stateName_;
-            if (eventObserver != null) {
-                eventObserver.Broadcast (StateObj.BEGIN_STATECHANGE, currentState, targetState);
+            if (eventDispatcher != null) {
+                eventDispatcher.DispatchEvent (StateObj.BEGIN_STATECHANGE, currentState, targetState);
             }
             return targetState;
         }
@@ -62,8 +62,8 @@ namespace Objs {
             lastState = currentState; //当前状态记录成上一个状态
             currentState = targetState;
             targetState = null;
-            if (eventObserver != null) {
-                eventObserver.Broadcast (StateObj.END_STATECHANGE, lastState, currentState);
+            if (eventDispatcher != null) {
+                eventDispatcher.DispatchEvent (StateObj.END_STATECHANGE, lastState, currentState);
             }
             return currentState;
         }

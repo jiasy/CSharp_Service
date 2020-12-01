@@ -13,7 +13,7 @@ namespace App {
     public class AppStateBase : StateObj {
         public Dictionary<string, List<string>> appStateDict = new Dictionary<string, List<string>> ();
         //需要监听者来监听状态变化
-        public AppStateBase (EventObserverObj eventObserver_) : base (eventObserver_) {
+        public AppStateBase (EventDispatcherObj eventDispatcher_) : base (eventDispatcher_) {
 
         }
 

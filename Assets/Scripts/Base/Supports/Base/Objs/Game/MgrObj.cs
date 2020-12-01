@@ -7,7 +7,7 @@ using Objs;
 namespace Game {
     public class MgrObj : BaseObj {
         public GameWorldBase gameWorld;
-        public EventObserverObj eventObserver; //事件管理
+        public EventDispatcherObj eventDispatcher; //事件管理
 
         //各种管理器
         public ConfigMgrBase configMgr; //配置管理
@@ -24,7 +24,7 @@ namespace Game {
         public override void Dispose () {
             //销毁关联引用关系
             gameWorld = null;
-            eventObserver = null;
+            eventDispatcher = null;
             configMgr = null;
             groupMgr = null;
             creationMgr = null;
@@ -38,7 +38,7 @@ namespace Game {
         public void init () {
             //获取各种引用
             gameWorld = GameWorldBase.instance;
-            eventObserver = gameWorld.eventObserver;
+            eventDispatcher = gameWorld.eventDispatcher;
             configMgr = gameWorld.configMgr;
             groupMgr = gameWorld.groupMgr;
             creationMgr = gameWorld.insMgr;

@@ -16,13 +16,13 @@ namespace Objs {
                 state = new StateObj ();
             }
             //监听状态变化事件
-            state.eventObserver.AddListener<string, string> (StateObj.BEGIN_STATECHANGE, beginStateChange);
-            state.eventObserver.AddListener<string, string> (StateObj.END_STATECHANGE, endStateChange);
+            state.eventDispatcher.AddListener<string, string> (StateObj.BEGIN_STATECHANGE, beginStateChange);
+            state.eventDispatcher.AddListener<string, string> (StateObj.END_STATECHANGE, endStateChange);
         }
         public override void Dispose () {
             //移除状态变化事件监听
-            state.eventObserver.RemoveListener<string, string> (StateObj.BEGIN_STATECHANGE, beginStateChange);
-            state.eventObserver.RemoveListener<string, string> (StateObj.END_STATECHANGE, endStateChange);
+            state.eventDispatcher.RemoveListener<string, string> (StateObj.BEGIN_STATECHANGE, beginStateChange);
+            state.eventDispatcher.RemoveListener<string, string> (StateObj.END_STATECHANGE, endStateChange);
             state.Dispose ();
             state = null;
             base.Dispose ();

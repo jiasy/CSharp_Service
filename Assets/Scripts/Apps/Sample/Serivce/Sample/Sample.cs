@@ -21,7 +21,7 @@ namespace Sample {
             //测试 JsonDataUtils
             JsonDataWrapObj.doSample();
 
-            //测试 EventObserverObj
+            //测试 EventDispatcherObj
             GameObj.doSample();
 
             //设置测试对象

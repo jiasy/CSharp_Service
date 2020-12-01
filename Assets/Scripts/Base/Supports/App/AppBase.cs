@@ -30,7 +30,7 @@ namespace App {
             (AppStateBase) TypeUtils.getObjectByClassName (
                 appName_ + ".AppState",
                 new object[1]{
-                    new EventObserverObj()
+                    new EventDispatcherObj()
                 }
             )
         ) {
