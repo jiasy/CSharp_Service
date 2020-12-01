@@ -38,7 +38,7 @@ namespace Utils {
         // }
 
         //设置给VO对象
-        public static bool saveValueObj (ValueObj valueObj_, string keyName_) {
+        public static bool saveValueObjToLocal (ValueObj valueObj_, string keyName_) {
             try {
                 PlayerPrefs.SetString (keyName_, valueObj_.getJsonStr(keyName_));
                 return true;
@@ -50,11 +50,11 @@ namespace Utils {
             return false;
         }
 
-        public static bool loadValueObj (ValueObj valueObj_, string keyName_) {
+        public static bool loadLocalToValueObj (ValueObj valueObj_, string keyName_) {
             if (PlayerPrefs.HasKey (keyName_)) { //有这个路径存储那么就取的
                 string _saveStr = PlayerPrefs.GetString (keyName_); //获取字符串
                 JsonData _saveJsonData = JsonMapper.ToObject (_saveStr); //转换json对象
-                valueObj_.sv(keyName_,_saveJsonData,true);//json对象对应到指定节点上
+                valueObj_.setValueToPath(keyName_,_saveJsonData,true);//json对象对应到指定节点上
                 return true;
             } else { //没有就返回false
                 return false;

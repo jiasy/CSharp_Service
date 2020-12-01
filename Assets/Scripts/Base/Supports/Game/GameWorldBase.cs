@@ -17,7 +17,7 @@ namespace Game {
         //事件分发对象
         public EventObserverObj eventObserver;
         //数值变更对象
-        public ValueObj vo;
+        public ValueObj valueObject;
         //各种管理器
         public ConfigMgrBase configMgr; //配置管理
         public GroupMgrBase groupMgr; //阵营，分组管理
@@ -43,7 +43,7 @@ namespace Game {
             //全局引用
             GameWorldBase.instance = this;
             //世界的数据对象
-            vo = new ValueObj ();
+            valueObject = new ValueObj ();
             //世界的事件分发中心
             eventObserver = new EventObserverObj();
 
@@ -68,7 +68,7 @@ namespace Game {
         }
 
         public void Dispose () {
-            vo.Dispose ();
+            valueObject.Dispose ();
             eventObserver.Dispose ();
             configMgr.Dispose ();
             groupMgr.Dispose ();
@@ -82,12 +82,12 @@ namespace Game {
 
         //重新根据给定的数据初始化
         public void initVo (JsonData jsonData_, bool dispatch_) {
-            vo.sv ("game", jsonData_, dispatch_); //设置值对象，初始化，设置对象，可以不分发事件给监听。
+            valueObject.setValueToPath ("game", jsonData_, dispatch_); //设置值对象，初始化，设置对象，可以不分发事件给监听。
         }
         public void initVo (object dataObject_, bool dispatch_) {
-            vo.sv ("game", dataObject_, dispatch_); //设置值对象，初始化，设置对象，可以不分发事件给监听。
+            valueObject.setValueToPath ("game", dataObject_, dispatch_); //设置值对象，初始化，设置对象，可以不分发事件给监听。
         }
-        private void Update () {
+        public void Update () {
             
         }
     }

@@ -38,7 +38,7 @@ namespace Game {
         public void init () {
             //获取各种引用
             gameWorld = GameWorldBase.instance;
-            ec = gameWorld.ec;
+            eventObserver = gameWorld.eventObserver;
             configMgr = gameWorld.configMgr;
             groupMgr = gameWorld.groupMgr;
             creationMgr = gameWorld.insMgr;

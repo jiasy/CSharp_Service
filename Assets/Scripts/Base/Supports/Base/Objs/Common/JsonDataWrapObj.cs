@@ -172,11 +172,11 @@ namespace Objs {
 
         //路径拆分成前后两部分
         public static string[] separatePath(string path_){
-            if (path_.Contains(".")) {//多
-                ArrayList _dataPathList = new ArrayList (path_.Split('.'));
-                string _key = (string)_dataPathList[_dataPathList.Count - 1];
-                _dataPathList.RemoveAt(_dataPathList.Count - 1);//退出最后一个
-                string _dictPath = string.Join(".",_dataPathList);//合并出所在的字典节点路径
+            if (path_.Contains(".")) {
+                ArrayList _dataPathList = new ArrayList (path_.Split('.'));//string[]不是可变数组，
+                string _key = (string)_dataPathList[_dataPathList.Count - 1];//移除操作需要在可变数组内进行
+                _dataPathList.RemoveAt(_dataPathList.Count - 1);//推出最后一个
+                string _dictPath = string.Join(".",(string[])_dataPathList.ToArray(typeof( string)));//string.Join 需要 string[]，否则结果不正确
                 return new string[]{_dictPath,_key};
             }else{
                 return new string[]{"",path_};
@@ -230,7 +230,7 @@ namespace Objs {
         public JsonData getJsonDataOnPath(string path_,bool makeSureExists_ = false){
             JsonData _dataOnPath = null;
             if (pathValueDict.ContainsKey(path_)){
-                _dataOnPath = pathValueDict[path_];
+                _dataOnPath = (JsonData)pathValueDict[path_];
             }else{
                 ArrayList _dataPathList = null;
                 if (path_.Contains (".")) {//多层
@@ -328,13 +328,13 @@ namespace Objs {
             }
         }
         //直接向路径赋值
-        public void setValueToDataPath(string path_,JsonData value_){
-            string[] _separatePathAndKey = separatePath(path_);
-            addKeyValueToPath(_separatePathAndKey[0],_separatePathAndKey[1],value_);
+        public void setValueToPath(string path_,JsonData value_){
+            string[] _separatePathAndKey = separatePath(path_);//拆分路径，目标字典路径 + 字典上的键名
+            addKeyValueToPath(_separatePathAndKey[0],_separatePathAndKey[1],value_,true);
         }
-        public void setValueToDataPath(string path_,object value_){
+        public void setValueToPath(string path_,object value_){
             string[] _separatePathAndKey = separatePath(path_);
-            addKeyValueToPath(_separatePathAndKey[0],_separatePathAndKey[1],value_);
+            addKeyValueToPath(_separatePathAndKey[0],_separatePathAndKey[1],value_,true);
         }
         //向路径上添加一个键值
         public void addKeyValueToPath(
@@ -349,7 +349,7 @@ namespace Objs {
             JsonData _originalValue = null;
             if (value_.IsInt ||value_.IsDouble ||value_.IsLong ||value_.IsBoolean ||value_.IsString) {
                 if (pathValueDict.ContainsKey(_currentPath)) {// 原来这个位置有值
-                    _originalValue = pathValueDict[_currentPath];//获取原有值
+                    _originalValue = (JsonData)pathValueDict[_currentPath];//获取原有值
                     checkIsValueTypeChange(_originalValue,value_,_currentPath);//校验当前值类型是否变化
                     _originalValue.Clear();
                 }
@@ -377,12 +377,7 @@ namespace Objs {
                     _sb.Append ("[");
                     _sb.Append ((_idx + 1).ToString());
                     _sb.Append ("]");
-                    addKeyValueToPath(
-                        _currentPath,
-                        _sb.ToString(),
-                        _tempValue,
-                        false
-                    );
+                    addKeyValueToPath(_currentPath,_sb.ToString(),_tempValue,false);
                     _sb.Clear();
                 }
                 //变更记录，刚放上的承载数据元素的新字典
@@ -391,12 +386,7 @@ namespace Objs {
                 //字典覆盖。不需要清理字典上与当前无关的值
                 foreach (string _tempKey in value_.Keys) {
                     var _tempValue = value_[_tempKey];
-                    addKeyValueToPath(
-                        _currentPath,
-                        _tempKey,
-                        _tempValue,
-                        false
-                    );
+                    addKeyValueToPath(_currentPath,_tempKey,_tempValue,false);
                 }
                 //变更记录，刚改变的字典(也可能是刚添加的字典)
                 justChangeDict[_currentPath] = getDictOnPath(_currentPath,false);
@@ -440,9 +430,17 @@ namespace Objs {
             }
             return _jsonArr;
         }
-        //C# 对象直接赋值
+        //C# 对象直接赋值，先转换成 JsonData ，然后走正常的数据路径抒写流程(内部有数组向字典的转换，不不需要在实现一套)
         public void addKeyValueToPath(string path_,string key_,object obj_,bool isMain_ = true){
-            addKeyValueToPath(path_,key_,convertObjectToJsonDict(obj_),isMain_);
+            if (obj_ is bool ||obj_ is string ||obj_ is int ||obj_ is double) {
+                addKeyValueToPath(path_,key_,new JsonData(obj_),isMain_);//转换包裹对象后写入
+            }else if(obj_ is Array) {
+                addKeyValueToPath(path_,key_,convertArrayToJsonList((Array)obj_),isMain_);//转换数组后写入
+            } else if (obj_ is object) {//最后包对象，因为对象是基类...上面的条件都满足
+                addKeyValueToPath(path_,key_,convertObjectToJsonDict(obj_),isMain_);//转换成对象后写入
+            }
+            
+            
         }
         #endregion
 

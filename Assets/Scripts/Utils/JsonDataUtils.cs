@@ -20,20 +20,17 @@ namespace Utils {
             Dict = 5
         }
         public static void doSample () {
-            testJsonFileToJson ();
+            //testJsonFileToJson ();
             //testDictToJson ();
         }
         public static void testJsonFileToJson () {
             string _path = "/Resources/testRes/testJson.json";
             string _jsonStr = FileUtils.ReadFileToString (_path);
             JsonData _jsonRoot = JsonMapper.ToObject (_jsonStr);
-            JsonDataWrap _jsonDataWrap = new JsonDataWrap ();
-            _jsonDataWrap.addKeyValueToPath(
-                "",
-                "testDict",
-                _jsonRoot
-            );
-            _jsonDataWrap.PrintJustChangeDict();
+            JsonData _dataSet = new JsonData ();
+            Dictionary<string, IJsonWrapper>[] _changeDictList = setValueToPath (_dataSet, "dict", _jsonRoot);
+            LogUtils.printDict (convertToKeyValueDict (_dataSet, ""));
+            Debug.Log (_dataSet.ToJson ());
         }
         public static void testDictToJson () {
             object _dict = new {
@@ -57,7 +54,7 @@ namespace Utils {
                 // }
             };
             JsonData _dataSet = new JsonData ();
-            setValueToDataPath (_dataSet, null, _dict);
+            setValueToPath (_dataSet, null, _dict);
             LogUtils.printDict (convertToKeyValueDict (_dataSet, ""));
 
             object _dict2 = new {
@@ -73,7 +70,7 @@ namespace Utils {
                     }
                 }
             };
-            setValueToDataPath (_dataSet, null, _dict2); //Overwrite data value in same data path.
+            setValueToPath (_dataSet, null, _dict2); //Overwrite data value in same data path.
             LogUtils.printDict (convertToKeyValueDict (_dataSet, ""));
 
             var _value = getValueFromDataPath (_dataSet, "E[0].market");
@@ -90,7 +87,7 @@ namespace Utils {
             _changeDict[5/*(int) DataType.Dict*/] = new Dictionary<string, IJsonWrapper> ();
             return _changeDict;
         }
-        //EventCenterObj,Data change happened.one at a time.
+        //EventObserverObj,Data change happened.one at a time.
         public static Dictionary<string, IJsonWrapper>[] clearChangeDict () {
             _currentChangingDict[0/*(int) DataType.Int*/].Clear ();
             _currentChangingDict[1/*(int) DataType.Float*/].Clear ();
@@ -211,7 +208,7 @@ namespace Utils {
             return _dataPosition;
         }
 
-        public static Dictionary<string, IJsonWrapper>[] setValueToDataPath (JsonData jsonNode_, string dataPath_, JsonData value_, bool dispatchEvent_ = true) {
+        public static Dictionary<string, IJsonWrapper>[] setValueToPath (JsonData jsonNode_, string dataPath_, JsonData value_, bool dispatchEvent_ = true) {
             Dictionary<string, IJsonWrapper>[] _changeDict = clearChangeDict ();
             ArrayList _dataPathList = null;
             if (!string.IsNullOrEmpty (dataPath_)) { //多层路径下
@@ -282,7 +279,7 @@ namespace Utils {
                                 }
                             }
                         } else if (value_.IsArray) { //数组替换
-                            Debug.LogError ("ERROR 不能直接向一个路径赋值数组。\n  如果向 path.arr 赋值数组\n    请使用 \n      objet _arrDict = {arr:[数组]};\n      sv(path,_arrDict)");
+                            Debug.LogError ("ERROR 不能直接向一个路径赋值数组。\n  如果向 path.arr 赋值数组\n    请使用 \n      objet _arrDict = {arr:[数组]};\n      setValueToPath(path,_arrDict)");
                             //resetArrayOnDataPath (_dataPosition, dataPath_, _currentKey, value_, _changeDict, dispatchEvent_);
                         } else if (value_.IsObject) { //字典覆盖
                             if (_dataPosition.ContainsKey (_currentKey) == false) { //原来在这个数据路径上没有，就可以直接引用
@@ -435,7 +432,7 @@ namespace Utils {
             }
         }
 
-        public static Dictionary<string, IJsonWrapper>[] setValueToDataPath (JsonData jsonNode_, string dataPath_, object value_, bool dispatchEvent_ = true) {
+        public static Dictionary<string, IJsonWrapper>[] setValueToPath (JsonData jsonNode_, string dataPath_, object value_, bool dispatchEvent_ = true) {
             Dictionary<string, IJsonWrapper>[] _changeDict = clearChangeDict ();
 
             ArrayList _dataPathList = null;
@@ -505,7 +502,7 @@ namespace Utils {
                             }
                         }
                     } else if (value_ is Array) {
-                        Debug.LogError ("ERROR 不能直接向一个路径赋值数组。\n  如果向 path.arr 赋值数组\n    请使用 \n      objet _arrDict = {arr:[数组]};\n      sv(path,_arrDict)");
+                        Debug.LogError ("ERROR 不能直接向一个路径赋值数组。\n  如果向 path.arr 赋值数组\n    请使用 \n      objet _arrDict = {arr:[数组]};\n      setValueToPath(path,_arrDict)");
                         //resetArrayOnDataPath (_dataPosition, dataPath_, _currentKey, (Array) value_, _changeDict, dispatchEvent_);
                     } else if (value_ is object) {
                         if (_dataPosition.ContainsKey (_currentKey) == false) {

@@ -2,6 +2,7 @@ using Game;
 using Service;
 using UnityEngine;
 using Utils;
+using Objs;
 
 namespace Sample {
     public class Sample : ServiceBase {
@@ -18,15 +19,15 @@ namespace Sample {
             _sub1.doSampeSub ();
 
             //测试 JsonDataUtils
-            JsonDataUtils.doSample();
+            JsonDataWrapObj.doSample();
 
             //测试 EventObserverObj
-            EventObserverObj.doSample();
+            GameObj.doSample();
 
             //设置测试对象
-            GameObj _obj = new GameObj (null);
+            GameObj _obj = new GameObj(null);
             //设置一下hp值，是否触发相应反应。
-            _obj.vo.sv ("hp", -1);
+            _obj.setValueToPath ("hp", -1);
         }
 
         public override void destory () {
