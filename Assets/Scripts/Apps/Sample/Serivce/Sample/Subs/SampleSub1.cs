@@ -18,7 +18,7 @@ namespace Sample {
         }
 
         public override void Dispose () {
-             Debug.Log(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName + " Dispose");
+            Debug.Log(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType.FullName + " Dispose");
             base.Dispose ();
         }
 

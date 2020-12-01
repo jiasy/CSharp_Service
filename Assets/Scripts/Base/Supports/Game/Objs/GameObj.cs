@@ -20,7 +20,7 @@ namespace Game {
             _gameObj.removeDataPathListen("prop.iHp");
             _gameObj.removeDataPathListen("prop.sName");
         }
-
+        //世界对象，可以有很多个世界对象。引用自己所在的那个。
         public GameWorldBase gameWorld;
         public ValueObj valueObject = null;
         private List<string> _dataPathListenList = new List<string>();//监听的数据列表
@@ -37,7 +37,7 @@ namespace Game {
             }
             valueObject.Dispose ();
             valueObject = null;
-            
+            gameWorld = null;
             base.Dispose ();
         }
 

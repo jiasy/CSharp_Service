@@ -10,8 +10,9 @@ using UnityEngine;
 using Utils;
 
 namespace App {
-    public class AppComponent : MonoBehaviour {
-        protected void initApp(string namespace_){
+    //App的承载组件
+    public class AppComponentBase : MonoBehaviour {
+        protected void initApp(string namespace_){//通过
             TypeUtils.getObjectByClassName (namespace_+".App");
             DontDestroyOnLoad (gameObject);//切换场景不删除当前APP所挂载的GameObject
         }

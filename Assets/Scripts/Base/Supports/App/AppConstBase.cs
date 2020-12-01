@@ -26,11 +26,6 @@ namespace App {
         public bool isMobile = false;
 
         public AppConstBase () : base () {
-            if (cc.appConst != null) {
-                Debug.LogError (" 全局已经存在一个 cc.appConst 。");
-            }
-            cc.appConst = this;
-
             //当前是不是手机，测试的时候，可以修改这个值
             if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) {
                 isMobile = true;

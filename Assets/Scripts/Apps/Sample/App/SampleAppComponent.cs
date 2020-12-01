@@ -11,7 +11,7 @@ using UnityEngine;
 using Utils;
 
 namespace Sample{
-    public class SampleAppComponent : AppComponent{
+    public class SampleAppComponent : AppComponentBase{
         void Start(){
             initApp("Sample");
         }

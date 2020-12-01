@@ -12,53 +12,28 @@ namespace Service {
     public class ServiceManager : BaseObj {
         private int currentCombinServiceTimes = 0;
         private List<ServiceBase> currentRunningServiceList = new List<ServiceBase> ();
-        private ValueObj _dataCenter = null;
 
-        //DataCenter 简写 cc.sm.dc
-        public ValueObj dc {
-            get { return _dataCenter; }
-            set {
-                if (_dataCenter == null) {
-                    _dataCenter = value;
-                    cc.dc = _dataCenter;//设置全局可取的变量
-                } else {
-                    Debug.LogError (fullClassName + " dataCenter 只能创建一次");
-                }
-            }
-        }
-
-        //EventCenter 简写 cc.sm.ec
-        public EventDispatcherObj ec;
         public ServiceManager () : base () {
-            if (cc.sm != null) {
-                Debug.LogError (fullClassName + " 全局已经存在一个 cc.sm 。");
-            }
-            cc.sm = this;
-            ec = new EventDispatcherObj();//事件分发对象
-            _dataCenter = new ValueObj ();//依然支持基础的数据变化事件
+
         }
 
         public override void Dispose () {
-            dc.Dispose ();
-            ec.Dispose ();
-            _dataCenter = null;
-            ec = null;
             base.Dispose ();
         }
 
         //通过服务名称，添加运行服务
         public ServiceBase addServiceByName (string serviceName_) {
-            ServiceBase _s = createServiceByName (serviceName_);
-            currentRunningServiceList.Add (_s);
-            return _s;
+            ServiceBase _service = createServiceByName (serviceName_);
+            currentRunningServiceList.Add (_service);
+            return _service;
         }
 
         //通过服务名移除服务
         public ServiceBase removeServiceByName (string serviceName_) {
-            ServiceBase _s = getServiceByName (serviceName_);
-            if (_s != null) { //找到就移除，并返回
-                currentRunningServiceList.Remove (_s); //移除这个服务
-                return _s;
+            ServiceBase _service = getServiceByName (serviceName_);
+            if (_service != null) { //找到就移除，并返回
+                currentRunningServiceList.Remove (_service); //移除这个服务
+                return _service;
             } else { //找不到返回空
                 return null;
             }
@@ -66,17 +41,17 @@ namespace Service {
 
         //通过服务名称创建服务
         public ServiceBase createServiceByName (string serviceName_) {
-            ServiceBase _s = (ServiceBase) TypeUtils.getObjectByClassName (cc.app.appName + "."+serviceName_);
-            _s.serviceName = serviceName_;
-            return _s;
+            ServiceBase _service = (ServiceBase) TypeUtils.getObjectByClassName (cc.app.appName + "."+serviceName_);
+            _service.serviceName = serviceName_;
+            return _service;
         }
 
         //通过名称获取当前运行的服务
         public ServiceBase getServiceByName (string serviceName_) {
             for (int _idx = 0; _idx < currentRunningServiceList.Count; _idx++) {
-                ServiceBase _s = currentRunningServiceList[_idx];
-                if (_s.serviceName == serviceName_) {
-                    return _s;
+                ServiceBase _service = currentRunningServiceList[_idx];
+                if (_service.serviceName == serviceName_) {
+                    return _service;
                 }
             }
             return null;

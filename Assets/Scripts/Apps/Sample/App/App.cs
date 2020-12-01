@@ -10,9 +10,8 @@ using UnityEngine;
 using Utils;
 
 namespace Sample {
-    //service manager
     public class App : AppBase {
-
+        // 在哪个命名空间下就是那个App
         public App () : base (System.Reflection.MethodBase.GetCurrentMethod ().DeclaringType.Namespace) {
             //在切换到测试
             // changeAppState ("First", delegate (string firstStateName_) {

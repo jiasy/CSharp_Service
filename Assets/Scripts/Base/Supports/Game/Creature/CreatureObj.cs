@@ -15,7 +15,7 @@ namespace Game {
         public SkinObj skin; //状态机判断，直接对应显示状态
         public LegObj leg; //位置，各种力叠加对速度的影响，地形对速度的影响等等。
 
-        public MoveControlObj _currentMoveControl; //当前控制位移的移动控制器。位移劫持，可以通过这个控制移动
+        public MoveControlObj _currentMoveControl; //当前控制位移的移动控制器。位移劫持，可以通过这个控制移动。
 
         public CreatureObj (GameWorldBase gameWorld_) : base (gameWorld_) {
             head = new HeadObj (this);
@@ -45,6 +45,8 @@ namespace Game {
             skin.updateF (); //刷新显示状态，通过state来指定表现状态 
             if (_currentMoveControl == leg) { //移动能力没有被劫持的情况下。
                 leg.updateF (); //根据附加值，来影响当前位置速度等 
+            }else{
+                _currentMoveControl.updateF();
             }
         }
     }

@@ -31,9 +31,10 @@ namespace Objs {
         //创建的时候要设置显示对象
         //显示对象都是gameObject
         public DisplayControlObj (GameObject go_, StateObj stateObj_ = null) : base (stateObj_) {
-            
+            _displayGameObject = go_;//引用要控制的对象
         }
         public override void Dispose () {
+            _displayGameObject = null;
             base.Dispose ();
         }
     }

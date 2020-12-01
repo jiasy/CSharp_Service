@@ -14,6 +14,7 @@ namespace Game {
             owner = owner_;
         }
         public override void Dispose () {
+            owner = null;
             base.Dispose ();
         }
         public void updateF () {

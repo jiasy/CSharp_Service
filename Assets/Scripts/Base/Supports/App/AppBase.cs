@@ -10,8 +10,6 @@ using Utils;
 
 namespace App {
     public class AppBase : StatefulObj {
-        public ServiceManager sm = null;//服务控制器
-        public AppConstBase appConst = null;//常量引用
         public string appName = null;//app名称
         private float _dt = 0.0f; // 帧时间累计
         private float _frameUpdateDt; //按照每秒帧数，计算每帧时间
@@ -39,28 +37,35 @@ namespace App {
                     " 全局已经存在一个 cc.app 。"
                 );
             }
-
-            cc.app = this;
+            
             appName = appName_;//获取App名称
-            appConst = (AppConstBase) TypeUtils.getObjectByClassName (appName_ + ".AppConst");//app常量
+            cc.app = this;
+            cc.appConst = (AppConstBase) TypeUtils.getObjectByClassName (appName_ + ".AppConst");//app常量
+            cc.serviceManager = new ServiceManager ();
+            cc.dataCenter = new ValueObj();
 
-            sm = new ServiceManager ();
             framePerSecond = 20; //逻辑更新帧数
             Application.targetFrameRate = 20; //Unity显示帧数
             //优化性能 工程层面来降低 Edit->Project Settings->Time 帧数
             // 刚体部件，可以启用插值办法来平滑刚体组件的运动
+
         }
 
         public override void Dispose () {
-
-            appConst.Dispose ();
+            cc.dataCenter.Dispose();
+            cc.serviceManager.Dispose();
+            cc.appConst.Dispose();
+            cc.dataCenter = null;
+            cc.serviceManager = null;
+            cc.appConst = null;
+            cc.app = null;
             base.Dispose ();
         }
 
         public void update (float dt_) {
             _dt = _dt + dt_;
             if (_dt > _frameUpdateDt) {
-                sm.update (_dt);//与上一帧的时间间隔。
+                cc.serviceManager.update (_dt);//与上一帧的时间间隔。
                 _dt = -(_dt - _frameUpdateDt);//超过的部分要从下一帧的时间间隔内刨除
             }
         }
@@ -74,7 +79,7 @@ namespace App {
         */
         public void changeAppState (string stateName_, System.Action<string> action) {
             if (state.stateChangeBegin (stateName_) != null) { //状态开始改变
-                sm.switchRunningServices ((state as AppStateBase).appStateDict[stateName_]);
+                cc.serviceManager.switchRunningServices ((state as AppStateBase).appStateDict[stateName_]);
                 state.stateChangeEnd (); //结束状态变化
                 if (action != null) { //有回调，回调参数是 string，之后执行
                     action.Invoke (stateName_);
