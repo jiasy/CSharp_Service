@@ -12,21 +12,22 @@ namespace Objs {
         public string currentState; //当前状态
         public string lastState; //上一个状态
         public string targetState; //目标状态
-        public EventCenterObj ec; //事件分发
+        public EventObserverObj eventObserver; //事件分发
 
-        public StateObj (EventCenterObj ec_ = null) : base () {
+        public StateObj (EventObserverObj eventObserver_ = null) : base () {
             currentState = null;
             lastState = null;
             targetState = null;
             //可以用给定的，也可以用自己创建的
-            if (ec_ == null) {
-                ec = new EventCenterObj ();
+            if (eventObserver_ == null) {
+                eventObserver = new EventObserverObj ();
             } else {
-                ec = ec_;
+                eventObserver = eventObserver_;
             }
         }
         public override void Dispose () {
-            ec.Dispose ();
+            eventObserver.Dispose ();
+            eventObserver = null;
             base.Dispose ();
         }
         //立刻改变状态，然后，立刻结束。
@@ -48,8 +49,8 @@ namespace Objs {
                 return targetState;
             }
             targetState = stateName_;
-            if (ec != null) {
-                ec.Broadcast (StateObj.BEGIN_STATECHANGE, currentState, targetState);
+            if (eventObserver != null) {
+                eventObserver.Broadcast (StateObj.BEGIN_STATECHANGE, currentState, targetState);
             }
             return targetState;
         }
@@ -61,8 +62,8 @@ namespace Objs {
             lastState = currentState; //当前状态记录成上一个状态
             currentState = targetState;
             targetState = null;
-            if (ec != null) {
-                ec.Broadcast (StateObj.END_STATECHANGE, lastState, currentState);
+            if (eventObserver != null) {
+                eventObserver.Broadcast (StateObj.END_STATECHANGE, lastState, currentState);
             }
             return currentState;
         }

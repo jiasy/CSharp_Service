@@ -13,12 +13,13 @@ namespace App {
     public class AppStateBase : StateObj {
         public Dictionary<string, List<string>> appStateDict = new Dictionary<string, List<string>> ();
         //需要监听者来监听状态变化
-        public AppStateBase (EventCenterObj ec_) : base (ec_) {
+        public AppStateBase (EventObserverObj eventObserver_) : base (eventObserver_) {
 
         }
 
         public override void Dispose () {
             appStateDict.Clear();
+            appStateDict = null;
             base.Dispose ();
         }
     }

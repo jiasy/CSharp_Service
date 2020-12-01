@@ -13,7 +13,7 @@ namespace Sample {
     //service manager
     public class AppState : AppStateBase {
 
-        public AppState (EventCenterObj ec_) : base (ec_) {
+        public AppState (EventObserverObj ec_) : base (ec_) {
             appStateDict.Add ("Sample", new List<string> () { "Sample" });
         }
 

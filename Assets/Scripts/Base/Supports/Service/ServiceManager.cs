@@ -28,13 +28,13 @@ namespace Service {
         }
 
         //EventCenter 简写 cc.sm.ec
-        public EventCenterObj ec;
+        public EventObserverObj ec;
         public ServiceManager () : base () {
             if (cc.sm != null) {
                 Debug.LogError (fullClassName + " 全局已经存在一个 cc.sm 。");
             }
             cc.sm = this;
-            ec = new EventCenterObj();//事件分发对象
+            ec = new EventObserverObj();//事件分发对象
             _dataCenter = new ValueObj ();//依然支持基础的数据变化事件
         }
 

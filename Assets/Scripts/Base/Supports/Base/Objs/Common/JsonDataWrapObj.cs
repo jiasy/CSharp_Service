@@ -8,7 +8,30 @@ using System.Text;
 
 //json格式数据的包装
 namespace Objs {
-    public class JsonDataWrap : BaseObj {
+    public class JsonDataWrapObj : BaseObj {
+        #region 样例
+        public static void doSample () {
+            object _dict = new {
+                A = "C-180",
+                B = new [] { "tag1", "tag2", "tag3" },
+                C = new string[] { },
+                D = new [] { "SE" },
+                E = new [] {
+                    new {
+                        market = "SE",
+                        value = new {
+                            amount = 6.39,
+                            currency = "USD"
+                        }
+                    }
+                }
+            };
+            JsonDataWrapObj _jsonDataWrap = new JsonDataWrapObj ();
+            _jsonDataWrap.addKeyValueToPath(null,"dict",_dict);
+            _jsonDataWrap.printPathValueDict();
+            Debug.Log(_jsonDataWrap.toJsonString());
+        }
+        #endregion
         #region 静态方法
         private static string _jsonListMark = "<LIST_MARK>";
         //数据节点是否是数组转化而来的判断。
@@ -67,6 +90,7 @@ namespace Objs {
             }
             return _jsonDict;
         }
+        //数据节点 JsonData 节点转换成 json 字符串
         public static string toJsonString(JsonData jsonDict_){
             return convertToNormalJsonData(jsonDict_).ToJson();
         }
@@ -78,7 +102,7 @@ namespace Objs {
         public Dictionary<string, JsonData> justChangeDict = new Dictionary<string,JsonData>();
 
         #region 创建销毁
-        public JsonDataWrap () : base () {
+        public JsonDataWrapObj () : base () {
             dataSet = new JsonData ();
             dataSet.SetJsonType (JsonType.Object);
         }
@@ -145,6 +169,19 @@ namespace Objs {
         public string toJsonString(){
             return toJsonString(dataSet);
         }
+
+        //路径拆分成前后两部分
+        public static string[] separatePath(string path_){
+            if (path_.Contains(".")) {//多
+                ArrayList _dataPathList = new ArrayList (path_.Split('.'));
+                string _key = (string)_dataPathList[_dataPathList.Count - 1];
+                _dataPathList.RemoveAt(_dataPathList.Count - 1);//退出最后一个
+                string _dictPath = string.Join(".",_dataPathList);//合并出所在的字典节点路径
+                return new string[]{_dictPath,_key};
+            }else{
+                return new string[]{"",path_};
+            }
+        }
         #endregion
 
         private struct ParentDictInfo{
@@ -154,15 +191,12 @@ namespace Objs {
         }; 
         private ParentDictInfo getParentDictInfo(string path_){
             ParentDictInfo _parentDictInfo;
+            string[] _separatePathAndKey = separatePath(path_);
+            _parentDictInfo.parentPath = _separatePathAndKey[0];
+            _parentDictInfo.key = _separatePathAndKey[1];
             if (path_.Contains(".")) {//多层
-                ArrayList _dataPathList = new ArrayList (path_.Split('.'));
-                _parentDictInfo.key = (string)_dataPathList[_dataPathList.Count - 1];
-                _dataPathList.RemoveAt(_dataPathList.Count - 1);//退出最后一个
-                _parentDictInfo.parentPath = string.Join(".",_dataPathList);//合并出所在的字典节点路径
                 _parentDictInfo.parentDict = getDictOnPath(_parentDictInfo.parentPath,false);//获取父数据节点，不确保其存在
             } else { //根路径下的第一层
-                _parentDictInfo.key = path_;
-                _parentDictInfo.parentPath = "";
                 _parentDictInfo.parentDict = dataSet;
             }
             return _parentDictInfo;
@@ -192,12 +226,11 @@ namespace Objs {
                 );
             }
         }
-
-        //获取路径上的对象
-        public JsonData getDictOnPath(string path_,bool makeSureExists_ = true){
-            JsonData _dictOnPath = null;
+        //获得数据
+        public JsonData getJsonDataOnPath(string path_,bool makeSureExists_ = false){
+            JsonData _dataOnPath = null;
             if (pathValueDict.ContainsKey(path_)){
-                _dictOnPath = pathValueDict[path_];
+                _dataOnPath = pathValueDict[path_];
             }else{
                 ArrayList _dataPathList = null;
                 if (path_.Contains (".")) {//多层
@@ -206,35 +239,39 @@ namespace Objs {
                     _dataPathList = new ArrayList ();
                     _dataPathList.Add (path_);
                 }
-                _dictOnPath = dataSet;//数据枝干节点
+                _dataOnPath = dataSet;//数据枝干节点
                 StringBuilder _sb = new StringBuilder (20);//当前路径拼接
                 while (_dataPathList.Count > 0) {//逐层级，直至目标对象
                     string _currentKey = (string) _dataPathList[0];//逐层向下获取节点
                     _dataPathList.RemoveAt (0);
                     _sb.Append(_currentKey);
-                    if (_dictOnPath.ContainsKey(_currentKey) == false) {//没有这个键对应的对象，就创建
+                    if (_dataOnPath.ContainsKey(_currentKey) == false) {//没有这个键对应的对象，就创建
                         if (makeSureExists_){//确保其一定存在
-                            _dictOnPath[_currentKey] = new JsonData ();
-                            _dictOnPath[_currentKey].SetJsonType(JsonType.Object);
-                            pathValueDict[_sb.ToString()] = _dictOnPath[_currentKey];//缓存到路径和值的键值对中
+                            _dataOnPath[_currentKey] = new JsonData ();
+                            _dataOnPath[_currentKey].SetJsonType(JsonType.Object);
+                            pathValueDict[_sb.ToString()] = _dataOnPath[_currentKey];//缓存到路径和值的键值对中
                         }else{//不确保存在，遇到不存在就直接返回空。
                             _sb.Clear();
                             return null;
                         }
                     }
-                    _dictOnPath = _dictOnPath[_currentKey];
+                    _dataOnPath = _dataOnPath[_currentKey];
                     _sb.Append(".");
                 }
                 _sb.Clear();
             }
+            return _dataOnPath;
+        }
 
-            if (!_dictOnPath.IsObject) {//不是字典就返回空
+        //获取路径上的对象
+        public JsonData getDictOnPath(string path_,bool makeSureExists_ = false){
+            JsonData _dictOnPath = getJsonDataOnPath(path_,makeSureExists_);
+            if (_dictOnPath != null && !_dictOnPath.IsObject) {//不是字典就返回空
                 Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
                     " 数据路径不是字典 "+path_
                 );
                 return null;
             }
-
             return _dictOnPath;
         }
         
@@ -289,6 +326,15 @@ namespace Objs {
                         "原有值是数组或字典，变换成纯值\n"+currentPath_);
                 }
             }
+        }
+        //直接向路径赋值
+        public void setValueToDataPath(string path_,JsonData value_){
+            string[] _separatePathAndKey = separatePath(path_);
+            addKeyValueToPath(_separatePathAndKey[0],_separatePathAndKey[1],value_);
+        }
+        public void setValueToDataPath(string path_,object value_){
+            string[] _separatePathAndKey = separatePath(path_);
+            addKeyValueToPath(_separatePathAndKey[0],_separatePathAndKey[1],value_);
         }
         //向路径上添加一个键值
         public void addKeyValueToPath(
@@ -399,7 +445,6 @@ namespace Objs {
             addKeyValueToPath(path_,key_,convertObjectToJsonDict(obj_),isMain_);
         }
         #endregion
-        //给定路径的字典转换成Json格式字典(数组对象要还原回数组)
 
     }
 }

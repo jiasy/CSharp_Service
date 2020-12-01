@@ -39,9 +39,8 @@ namespace Utils {
 
         //设置给VO对象
         public static bool saveValueObj (ValueObj valueObj_, string keyName_) {
-            JsonData _dataPosition = JsonDataUtils.getValueFromDataPath (valueObj_.jsonRoot, "");
             try {
-                PlayerPrefs.SetString (keyName_, _dataPosition.ToJson ());
+                PlayerPrefs.SetString (keyName_, valueObj_.getJsonStr(keyName_));
                 return true;
             } catch (System.Exception err) {
                 Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod ().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
@@ -55,7 +54,7 @@ namespace Utils {
             if (PlayerPrefs.HasKey (keyName_)) { //有这个路径存储那么就取的
                 string _saveStr = PlayerPrefs.GetString (keyName_); //获取字符串
                 JsonData _saveJsonData = JsonMapper.ToObject (_saveStr); //转换json对象
-                JsonDataUtils.setValueToDataPath (valueObj_.jsonRoot, "", _saveJsonData, false); //json对象对应到指定节点上，不要触发事件。
+                valueObj_.sv(keyName_,_saveJsonData,true);//json对象对应到指定节点上
                 return true;
             } else { //没有就返回false
                 return false;

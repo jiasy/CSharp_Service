@@ -11,18 +11,19 @@ using Objs;
 namespace Game {
     public class GameObj : BaseObj {
         public GameWorldBase gameWorld;
-        public EventCenterObj ec = null;
+        public EventObserverObj eventObserver = null;
         public ValueObj vo = null;
         private List<string> _dataPathListenList = null;//监听的数据列表
         public GameObj (GameWorldBase gameWorld_) : base () {
             gameWorld = gameWorld_;
             //对象内的监听分发。
             vo = new ValueObj ();
-            ec = new EventCenterObj ();
+            eventObserver = new EventObserverObj ();
         }
         public override void Dispose () {
             //事件中心销毁
-            ec.Dispose ();
+            eventObserver.Dispose ();
+            eventObserver =null;
 
             //移除ValueObj的各种监听
             if (_dataPathListenList != null) {
@@ -31,8 +32,8 @@ namespace Game {
                 }
             }
             vo.Dispose ();
-            ec =null;
             vo = null;
+            
             base.Dispose ();
         }
 
@@ -58,19 +59,19 @@ namespace Game {
             string[] _dataPathArr = StringUtils.splitAWithB (dataPath_, ".");
             string _lastPath = _dataPathArr[_dataPathArr.Length - 1];
             if (_lastPath.IndexOf ("i") == 0) { //int
-                vo.ec.AddListener<string, int> (dataPath_, DataChanged);
+                vo.eventObserver.AddListener<string, int> (dataPath_, DataChanged);
             } else if (_lastPath.IndexOf ("s") == 0) { //string
-                vo.ec.AddListener<string, string> (dataPath_, DataChanged);
+                vo.eventObserver.AddListener<string, string> (dataPath_, DataChanged);
             } else if (_lastPath.IndexOf ("b") == 0) { //bool
-                vo.ec.AddListener<string, bool> (dataPath_, DataChanged);
+                vo.eventObserver.AddListener<string, bool> (dataPath_, DataChanged);
             } else if (_lastPath.IndexOf ("a") == 0) { //array
-                vo.ec.AddListener<string, JsonData> (dataPath_, DataChangedArr);
+                vo.eventObserver.AddListener<string, JsonData> (dataPath_, DataChangedArr);
             } else if (_lastPath.IndexOf ("d") == 0) { //dict
-                vo.ec.AddListener<string, JsonData> (dataPath_, DataChangedDict);
+                vo.eventObserver.AddListener<string, JsonData> (dataPath_, DataChangedDict);
             } else if (_lastPath.IndexOf ("f") == 0) { //float
-                vo.ec.AddListener<string, float> (dataPath_, DataChanged);
+                vo.eventObserver.AddListener<string, float> (dataPath_, DataChanged);
             } else {
-                vo.ec.AddListener<string, JsonData> (dataPath_, DataChangedDict);
+                vo.eventObserver.AddListener<string, JsonData> (dataPath_, DataChangedDict);
                 Debug.LogWarning ("数据路径不命名默认按照Dict处理 : " + _lastPath);
             }
         }
@@ -91,19 +92,19 @@ namespace Game {
             string[] _dataPathArr = StringUtils.splitAWithB (dataPath_, ".");
             string _lastPath = _dataPathArr[_dataPathArr.Length - 1];
             if (_lastPath.IndexOf ("i") == 0) { //int
-                vo.ec.RemoveListener<string, int> (dataPath_, DataChanged);
+                vo.eventObserver.RemoveListener<string, int> (dataPath_, DataChanged);
             } else if (_lastPath.IndexOf ("s") == 0) { //string
-                vo.ec.RemoveListener<string, string> (dataPath_, DataChanged);
+                vo.eventObserver.RemoveListener<string, string> (dataPath_, DataChanged);
             } else if (_lastPath.IndexOf ("b") == 0) { //bool
-                vo.ec.RemoveListener<string, bool> (dataPath_, DataChanged);
+                vo.eventObserver.RemoveListener<string, bool> (dataPath_, DataChanged);
             } else if (_lastPath.IndexOf ("a") == 0) { //array
-                vo.ec.RemoveListener<string, JsonData> (dataPath_, DataChangedArr);
+                vo.eventObserver.RemoveListener<string, JsonData> (dataPath_, DataChangedArr);
             } else if (_lastPath.IndexOf ("d") == 0) { //dict
-                vo.ec.RemoveListener<string, JsonData> (dataPath_, DataChangedDict);
+                vo.eventObserver.RemoveListener<string, JsonData> (dataPath_, DataChangedDict);
             } else if (_lastPath.IndexOf ("f") == 0) { //float
-                vo.ec.RemoveListener<string, float> (dataPath_, DataChanged);
+                vo.eventObserver.RemoveListener<string, float> (dataPath_, DataChanged);
             } else {
-                vo.ec.RemoveListener<string, JsonData> (dataPath_, DataChangedDict);
+                vo.eventObserver.RemoveListener<string, JsonData> (dataPath_, DataChangedDict);
             }
         }
 

@@ -15,7 +15,7 @@ namespace Game {
     public class GameWorldBase : MonoBehaviour {
         public static GameWorldBase instance = null;
         //事件分发对象
-        public EventCenterObj ec;
+        public EventObserverObj eventObserver;
         //数值变更对象
         public ValueObj vo;
         //各种管理器
@@ -45,7 +45,7 @@ namespace Game {
             //世界的数据对象
             vo = new ValueObj ();
             //世界的事件分发中心
-            ec = new EventCenterObj();
+            eventObserver = new EventObserverObj();
 
             //世界的事件监听分发
             configMgr = configMgr_;
@@ -69,7 +69,7 @@ namespace Game {
 
         public void Dispose () {
             vo.Dispose ();
-            ec.Dispose ();
+            eventObserver.Dispose ();
             configMgr.Dispose ();
             groupMgr.Dispose ();
             insMgr.Dispose ();

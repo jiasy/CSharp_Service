@@ -20,8 +20,8 @@ namespace Sample {
             //测试 JsonDataUtils
             JsonDataUtils.doSample();
 
-            //测试 EventCenterObj
-            EventCenterObj.doSample();
+            //测试 EventObserverObj
+            EventObserverObj.doSample();
 
             //设置测试对象
             GameObj _obj = new GameObj (null);

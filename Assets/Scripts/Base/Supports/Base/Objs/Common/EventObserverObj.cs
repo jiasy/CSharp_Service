@@ -15,7 +15,7 @@ public delegate void CallBack<T, X, Y, Z> (T arg1, X arg2, Y arg3, Z arg4);
 //任何一个对象，都可以持有一个事件转发对象。
 //ValueObj通过 动态的 数据路径，进行数据的监听
 //StateObj通过 固定的 状态 变化中 + 变化后，来做事件监听。
-public class EventCenterObj : BaseObj {
+public class EventObserverObj : BaseObj {
     private Dictionary<string, Delegate> _evtListenerDict = new Dictionary<string, Delegate> ();
 
     public static void doSample () {
@@ -27,11 +27,11 @@ public class EventCenterObj : BaseObj {
         GameObj _gameObj = new GameObj (null);
         _gameObj.addDataPathListenByList (_tempListenPath); //增加监听的数据路径
         //数据路径中的数据发生了变化，就会进行事件的分发。当然，只有想监听的才会被触发。
-        _gameObj.ec.Broadcast ("prop.iHp",  1); //广播变化
-        _gameObj.ec.Broadcast ("prop.sName",  "xx"); //未监听的变化
+        _gameObj.eventObserver.Broadcast ("prop.iHp",  1); //广播变化
+        _gameObj.eventObserver.Broadcast ("prop.sName",  "xx"); //未监听的变化
     }
 
-    public EventCenterObj () : base () {
+    public EventObserverObj () : base () {
 
     }
 

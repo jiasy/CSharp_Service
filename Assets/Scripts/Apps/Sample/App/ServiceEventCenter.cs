@@ -11,7 +11,7 @@ using Utils;
 
 namespace Sample {
     //service manager
-    public class ServiceEventCenter : EventCenterObj {
+    public class ServiceEventCenter : EventObserverObj {
 
         public ServiceEventCenter () : base () {
 
