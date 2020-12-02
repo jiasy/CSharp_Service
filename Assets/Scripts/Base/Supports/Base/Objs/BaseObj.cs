@@ -6,8 +6,8 @@ using Utils;
 
 namespace Objs {
     public class BaseObj : IDisposable {
-        public string fullClassName = null;
-        public bool _disposed = false;
+        public string fullClassName = null;//类全名
+        public bool _disposed = false;//是否已经消除
         private List<BaseObj> _belongToRunningList = null;
         public BaseObj () {
             //获取当前子类的类名

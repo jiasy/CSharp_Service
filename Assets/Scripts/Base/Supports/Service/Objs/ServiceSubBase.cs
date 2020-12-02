@@ -13,7 +13,7 @@ namespace Service {
             belongToService = belongToService_;
         }
         public override void Dispose () {
-            if (belongToService._disposed == false) {
+            if (belongToService._disposed) {
                 Debug.LogError (fullClassName + " Dispose 调用时间，所在服务应当已经调用了base.Dispose()");
             }
             base.Dispose ();

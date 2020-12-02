@@ -16,12 +16,12 @@ namespace Sample {
             //在切换到测试
             // changeAppState ("First", delegate (string firstStateName_) {
             //     Debug.Log ("First delegate : " + firstStateName_.ToString ());
-            //     changeAppState ("Test", delegate (string testStateName_) {
-            //         Debug.Log ("Test delegate : " + testStateName_.ToString ());
-                    changeAppState ("Sample", delegate (string sampeStateName_) {
-                        Debug.Log ("Sample delegate : " + sampeStateName_.ToString ());
+                changeAppState ("Sample", delegate (string testStateName_) {
+                    Debug.Log ("Sample delegate : " + testStateName_.ToString ());
+                    changeAppState ("Game", delegate (string sampeStateName_) {
+                        Debug.Log ("Game delegate : " + sampeStateName_.ToString ());
                     });
-            //     });
+                 });
             // });
         }
 

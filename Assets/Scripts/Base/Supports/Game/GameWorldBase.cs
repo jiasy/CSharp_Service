@@ -7,13 +7,13 @@ using Objs;
 using Service;
 using UnityEngine;
 using Utils;
+using App;
 
 //世界循环，承载GameObj集合
 //携带多个 PoolObj，用来惰性创建Obj
 
 namespace Game {
-    public class GameWorldBase : MonoBehaviour {
-        public static GameWorldBase instance = null;
+    public class GameWorldBase : BaseObj {
         //事件分发对象
         public EventDispatcherObj eventDispatcher;
         //数值变更对象
@@ -36,16 +36,14 @@ namespace Game {
             LoopMgrBase traverseMgr_,
             UpdateMgrBase updateMgr_
         ) {
-            if (GameWorldBase.instance != null) { //全局引用判断
+            if (cc.gameWorld != null) { //全局引用判断
                 Debug.LogError ("GameWorld instance is already exist~!");
                 return;
             }
-            //全局引用
-            GameWorldBase.instance = this;
-            //世界的数据对象
-            valueObject = new ValueObj ();
-            //世界的事件分发中心
-            eventDispatcher = new EventDispatcherObj();
+            
+            cc.gameWorld = this;//全局引用
+            valueObject = new ValueObj();//世界的数据对象
+            eventDispatcher = new EventDispatcherObj();//世界的事件分发中心
 
             //世界的事件监听分发
             configMgr = configMgr_;
@@ -64,10 +62,9 @@ namespace Game {
             processMgr.init ();
             traverseMgr.init ();
             updateMgr.init ();
-        
         }
 
-        public void Dispose () {
+        public virtual void Dispose () {
             valueObject.Dispose ();
             eventDispatcher.Dispose ();
             configMgr.Dispose ();
@@ -77,7 +74,7 @@ namespace Game {
             processMgr.Dispose ();
             traverseMgr.Dispose ();
             updateMgr.Dispose ();
-            GameWorldBase.instance = null;
+            cc.gameWorld = null;
         }
 
         //重新根据给定的数据初始化
@@ -87,7 +84,7 @@ namespace Game {
         public void initVo (object dataObject_, bool dispatch_) {
             valueObject.setValueToPath ("game", dataObject_, dispatch_); //设置值对象，初始化，设置对象，可以不分发事件给监听。
         }
-        public void Update () {
+        public virtual void Update (float dt_) {
             
         }
     }

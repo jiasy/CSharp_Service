@@ -15,6 +15,7 @@ namespace Sample {
 
         public AppState (EventDispatcherObj ec_) : base (ec_) {
             appStateDict.Add ("Sample", new List<string> () { "Sample" });
+            appStateDict.Add ("Game", new List<string> () { "Game" });
         }
 
         public override void Dispose () {

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Objs;
+using App;
 
 namespace Game {
     public class MgrObj : BaseObj {
@@ -37,7 +38,7 @@ namespace Game {
 
         public void init () {
             //获取各种引用
-            gameWorld = GameWorldBase.instance;
+            gameWorld = cc.gameWorld;
             eventDispatcher = gameWorld.eventDispatcher;
             configMgr = gameWorld.configMgr;
             groupMgr = gameWorld.groupMgr;
