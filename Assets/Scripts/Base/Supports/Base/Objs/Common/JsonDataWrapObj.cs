@@ -41,6 +41,19 @@ namespace Objs {
             }
             return false;
         }
+        //将其转换成键值对字典
+        public static Dictionary<string,JsonData> convertDictToKeyValueDict(JsonDataWrapObj jsonDataWrap_, string path_) {
+            Dictionary<string,JsonData> _keyValueDict = new Dictionary<string,JsonData>();
+            foreach (string _path in jsonDataWrap_.pathValueDict.Keys) {
+                JsonData _valueOnPath = jsonDataWrap_.pathValueDict[_path];
+                if(_path.StartsWith(path_)){
+                    if (!_valueOnPath.IsObject && !_valueOnPath.IsArray){//所有值的根节点，构成的键值对字典
+                        _keyValueDict[_path] = _valueOnPath;
+                    }
+                }
+            }
+            return _keyValueDict;
+        }
         //将数组字典变换成数组
         private static JsonData convertDictToList(JsonData jsonDict_){
             if(isList(jsonDict_)){
@@ -69,6 +82,10 @@ namespace Objs {
             if(!jsonDict_.IsObject){
                 Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
                     "只有字典才能转换");
+            }
+            if(!jsonDict_.IsArray){
+                Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
+                    "转换后的字典不可能出现数组");
             }
             if(isList(jsonDict_)){
                 Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
@@ -178,7 +195,7 @@ namespace Objs {
                 _dataPathList.RemoveAt(_dataPathList.Count - 1);//推出最后一个
                 string _dictPath = string.Join(".",(string[])_dataPathList.ToArray(typeof( string)));//string.Join 需要 string[]，否则结果不正确
                 return new string[]{_dictPath,_key};
-            }else{
+            }else{//如果是 "" 返回就是 "" , "" 键为空会在后面报错。
                 return new string[]{"",path_};
             }
         }
@@ -438,9 +455,7 @@ namespace Objs {
                 addKeyValueToPath(path_,key_,convertArrayToJsonList((Array)obj_),isMain_);//转换数组后写入
             } else if (obj_ is object) {//最后包对象，因为对象是基类...上面的条件都满足
                 addKeyValueToPath(path_,key_,convertObjectToJsonDict(obj_),isMain_);//转换成对象后写入
-            }
-            
-            
+            }   
         }
         #endregion
 

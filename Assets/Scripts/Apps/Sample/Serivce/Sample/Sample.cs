@@ -18,7 +18,7 @@ namespace Sample {
             SampleSub1 _sub1 = (SampleSub1) getSubService ("Sub1");
             _sub1.doSampeSub ();
 
-            //测试 JsonDataUtils
+            //测试 JsonDataWrapObj
             JsonDataWrapObj.doSample();
 
             //测试 EventDispatcherObj
