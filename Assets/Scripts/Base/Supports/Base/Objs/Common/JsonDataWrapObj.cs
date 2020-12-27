@@ -46,7 +46,7 @@ namespace Objs {
             Dictionary<string,JsonData> _keyValueDict = new Dictionary<string,JsonData>();
             foreach (string _path in jsonDataWrap_.pathValueDict.Keys) {
                 JsonData _valueOnPath = jsonDataWrap_.pathValueDict[_path];
-                if(_path.StartsWith(path_)){
+                if(_path.StartsWith(path_,StringComparison.Ordinal)){
                     if (!_valueOnPath.IsObject && !_valueOnPath.IsArray){//所有值的根节点，构成的键值对字典
                         _keyValueDict[_path] = _valueOnPath;
                     }
@@ -55,7 +55,7 @@ namespace Objs {
             return _keyValueDict;
         }
         //将数组字典变换成数组
-        private static JsonData convertDictToList(JsonData jsonDict_){
+        private static JsonData backToNormalList(JsonData jsonDict_){
             if(isList(jsonDict_)){
                 JsonData _jsonList = new JsonData();
                 _jsonList.SetJsonType (JsonType.Array);
@@ -78,7 +78,7 @@ namespace Objs {
             }
         }
         //遍历转换获得一个正常的字典对象，用来转换回json
-        public static JsonData convertToNormalJsonData(JsonData jsonDict_){
+        public static JsonData backToNormalJsonDict(JsonData jsonDict_){
             if(!jsonDict_.IsObject){
                 Debug.LogError ("ERROR " + System.Reflection.MethodBase.GetCurrentMethod().ReflectedType.FullName + " -> " + new System.Diagnostics.StackTrace ().GetFrame (0).GetMethod ().Name + " : " +
                     "只有字典才能转换");
@@ -99,9 +99,9 @@ namespace Objs {
                     _jsonDict[_tempKey] = _tempValue;
                 }else if(_tempValue.IsObject){
                     if(isList(_tempValue)){
-                        _jsonDict[_tempKey] = convertDictToList(_tempValue);
+                        _jsonDict[_tempKey] = backToNormalList(_tempValue);
                     }else{
-                        _jsonDict[_tempKey] = convertToNormalJsonData(_tempValue);
+                        _jsonDict[_tempKey] = backToNormalJsonDict(_tempValue);
                     }
                 }
             }
@@ -109,7 +109,7 @@ namespace Objs {
         }
         //数据节点 JsonData 节点转换成 json 字符串
         public static string toJsonString(JsonData jsonDict_){
-            return convertToNormalJsonData(jsonDict_).ToJson();
+            return backToNormalJsonDict(jsonDict_).ToJson();
         }
         #endregion
 
